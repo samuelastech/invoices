@@ -1,6 +1,6 @@
 import './utils/array-helpers.js';
 import { notesService as service } from "./note/note.service.js";
-import { takeUntil } from './utils/operators.js';
+import { takeUntil, debounceTime } from './utils/operators.js';
 
 const operation = takeUntil(3, () => {
   service.sumItens('2143')
@@ -8,4 +8,4 @@ const operation = takeUntil(3, () => {
     .catch(console.error)
 });
 
-document.querySelector('#myButton').onclick = operation;
+document.querySelector('#myButton').onclick = debounceTime(500, operation);
