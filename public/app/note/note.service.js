@@ -1,15 +1,18 @@
-import { partialize, compose, pipe } from "../utils/operators.js";
+import { Maybe } from "../utils/maybe.js";
+import { partialize, pipe } from "../utils/operators.js";
 import { handleStatus } from "../utils/promise-helpers.js";
 
 const API = 'http://localhost:3000/notas';
 
-const getItemsFromNotes = (notes) => notes.$flatMap((note) => note.itens);
-const filterItemsByCode = (code, items) => items.filter((item) => item.codigo === code);
-const sumItemsValue = (items) => items.reduce((total, item) => total + item.valor, 0);
+const getItemsFromNotes = (notesM) => notesM.map((notes) => notes.$flatMap((note) => note.itens));
+const filterItemsByCode = (code, itemsM) => itemsM.map((items) => items.filter((item) => item.codigo === code));
+const sumItemsValue = (itemsM) => itemsM.map((items) => items.reduce((total, item) => total + item.valor, 0));
 
 export const notesService = {
   async listAll() {
-    return fetch(API).then(handleStatus);
+    return fetch(API)
+      .then(handleStatus)
+      .then(Maybe.of);
   },
 
   async sumItens(code) {
@@ -18,6 +21,7 @@ export const notesService = {
 
     return this.listAll()
       .then(sumItens)
+      .then(result => result.getOrElse(0))
       .catch(Promise.reject)
   }
 };
